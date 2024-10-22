@@ -149,7 +149,12 @@ class MetroMapApp(MDApp):
         self.current_mode = None
         if platform == 'android':
             from android.storage import app_storage_path
-            self.user_data_dir = app_storage_path()
+            self.user_data_dir = os.path.join(app_storage_path(), 'cache')
+            os.environ['MPLCONFIGDIR'] = self.user_data_dir
+            if not os.path.exists(os.environ['MPLCONFIGDIR']):
+                os.makedirs(os.environ['MPLCONFIGDIR'])
+            from android.permissions import request_permissions, Permission
+            request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
 
         print(self.user_data_dir)
         # Ensure directory exists
