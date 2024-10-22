@@ -147,6 +147,13 @@ class MetroMapApp(MDApp):
         self.current_path = None
         self.suppress_popup = False
         self.current_mode = None
+        if platform == 'android':
+            from android.storage import app_storage_path
+            self.user_data_dir = app_storage_path()
+
+        print(self.user_data_dir)
+        # Ensure directory exists
+        os.makedirs(self.user_data_dir, exist_ok=True)
 
         # Create the screen manager
         self.root = ScreenManager()
@@ -700,35 +707,39 @@ class MetroMapApp(MDApp):
             self.root.transition = SlideTransition(direction='left')
             self.root.current = 'visualization_page'
         except Exception as e:
-            self.suppress_popup = False  # Reset the flag in case of error
-            self.show_popup("Error", f"An error occurred: {str(e)}")
+            import traceback
+            traceback.print_exc()  # Print full stack trace
+            self.suppress_popup = False
+            self.show_popup("Error", f"Visualization error: {str(e)}")
+            return
 
     def adjust_image_size(self):
-        """Adjusts the image size based on its dimensions."""
-        image_size = plt.imread(os.path.join(self.user_data_dir, 'metro_map_visualization.png')).shape
-        image_height, image_width = image_size[0], image_size[1]
+        try:
+            image_path = os.path.join(self.user_data_dir, 'metro_map_visualization.png')
+            if not os.path.exists(image_path):
+                raise FileNotFoundError(f"Image not found at {image_path}")
+                
+            # Load image with error handling
+            image = plt.imread(image_path)
+            if image is None:
+                raise ValueError("Failed to load image")
+                
+            image_height, image_width = image.shape[0], image.shape[1]
+            
+            # Release memory
+            del image
+            
+            # Rest of your sizing code
+            if image_height > image_width:
+                self.visualization_image.size_hint = (None, 1)
+                self.visualization_image.size = (self.root.width * image_width / image_height, self.root.height)
+            else:
+                self.visualization_image.size_hint = (1, None)
+                self.visualization_image.size = (self.root.width, self.root.height * image_height / image_width)
+        except Exception as e:
+            print(f"Error in adjust_image_size: {e}")
 
-        # Determine the aspect ratio and fit accordingly
-        if image_height > image_width:
-            self.visualization_image.size_hint = (None, 1)  # Fit vertically
-            self.visualization_image.size = (self.root.width * image_width / image_height, self.root.height)
-        else:
-            self.visualization_image.size_hint = (1, None)  # Fit horizontally
-            self.visualization_image.size = (self.root.width, self.root.height * image_height / image_width)
-
-
-
-
-
-    def go_back_to_main(self, instance):
-        # Clear the visualization layout
-        self.visualization_layout.clear_widgets()
-
-        # Switch back to the main screen
-        self.root.transition = SlideTransition(direction='right')
-        self.root.current = 'main'
-
-        
+            
     def get_node_positions(self):
         # Define positions for nodes
         scale_x = 1
@@ -838,4 +849,31 @@ class MetroMapApp(MDApp):
         path.reverse()  # Reverse the path to get it from source to destination
 
         return distances.get(destination_num, float('inf')), path if distances.get(destination_num, float('inf')) < float('inf') else None
-MetroMapApp().run()
+
+    def go_back_to_main(self, instance):
+        try:
+            # Clear matplotlib resources
+            plt.close('all')
+            
+            # Clear widgets
+            if self.visualization_layout:
+                self.visualization_layout.clear_widgets()
+            
+            # Clear image cache
+            if hasattr(self, 'visualization_image'):
+                self.visualization_image.source = ''
+                
+            # Switch back
+            self.root.transition = SlideTransition(direction='right')
+            self.root.current = 'main'
+            
+            # Force garbage collection
+            gc.collect()
+        except Exception as e:
+            print(f"Error in go_back_to_main: {e}")
+
+if __name__ == '__main__':
+    try:
+        MetroMapApp().run()
+    except Exception as e:
+        print(f"Application error: {e}")
