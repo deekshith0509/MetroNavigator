@@ -5,7 +5,7 @@ package.domain = org.deekshith
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,dm
 source.main = main.py
-requirements = python3,kivy,requests,matplotlib,networkx,olefile,Pillow
+requirements = python3,kivy,requests,matplotlib,networkx,olefile,Pillow,android
 orientation = portrait
 presplash.filename = presplash.png  
 icon.filename = icon.png
@@ -16,7 +16,7 @@ android.accept_sdk_license = True
 android.api = 33
 android.ndk = 25b
 android.presplash_color = #FFFFFF
-android.permissions = WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,INTERNET
+android.permissions = WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
 
 # Versioning
 version = 0.2
