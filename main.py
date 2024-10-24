@@ -44,13 +44,13 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.floatlayout import FloatLayout
 from kivy.graphics import Color, Rectangle
 
-global user_data_dir
-user_data_dir='.'
+global self.user_data_dir
+self.user_data_dir='.'
 from kivy.utils import platform
 if platform == 'android':
     from android.storage import app_storage_path
-    user_data_dir = os.path.join(app_storage_path(), 'cache')
-    os.environ['MPLCONFIGDIR'] = user_data_dir
+    self.user_data_dir = os.path.join(app_storage_path(), 'cache')
+    os.environ['MPLCONFIGDIR'] = self.user_data_dir
     if not os.path.exists(os.environ['MPLCONFIGDIR']):
         os.makedirs(os.environ['MPLCONFIGDIR'])
     from android.permissions import request_permissions, Permission
@@ -160,9 +160,9 @@ class MetroMapApp(MDApp):
         self.suppress_popup = False
         self.current_mode = None
 
-        print(user_data_dir)
+        print(self.user_data_dir)
         # Ensure directory exists
-        os.makedirs(user_data_dir, exist_ok=True)
+        os.makedirs(self.user_data_dir, exist_ok=True)
 
         # Create the screen manager
         self.root = ScreenManager()
@@ -687,11 +687,11 @@ class MetroMapApp(MDApp):
             plt.title('Metro Map Visualization')
             plt.axis('off')
 
-            # Save the visualization using user_data_dir
-            visualization_path = os.path.join(user_data_dir, 'metro_map_visualization.png')
+            # Save the visualization using self.user_data_dir
+            visualization_path = os.path.join(self.user_data_dir, 'metro_map_visualization.png')
             plt.savefig(visualization_path, bbox_inches='tight', dpi=150)
             plt.close()
-            print(user_data_dir)
+            print(self.user_data_dir)
 
             # Clear the old visualization layout
             self.visualization_layout.clear_widgets()
@@ -724,7 +724,7 @@ class MetroMapApp(MDApp):
 
     def adjust_image_size(self):
         try:
-            image_path = os.path.join(user_data_dir, 'metro_map_visualization.png')
+            image_path = os.path.join(self.user_data_dir, 'metro_map_visualization.png')
             if not os.path.exists(image_path):
                 raise FileNotFoundError(f"Image not found at {image_path}")
                 
