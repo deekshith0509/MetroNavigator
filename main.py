@@ -44,8 +44,6 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.floatlayout import FloatLayout
 from kivy.graphics import Color, Rectangle
 
-global self.user_data_dir
-self.user_data_dir='.'
 from kivy.utils import platform
 if platform == 'android':
     from android.storage import app_storage_path
