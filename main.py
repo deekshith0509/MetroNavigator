@@ -45,14 +45,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.graphics import Color, Rectangle
 
 from kivy.utils import platform
-if platform == 'android':
-    from android.storage import app_storage_path
-    self.user_data_dir = os.path.join(app_storage_path(), 'cache')
-    os.environ['MPLCONFIGDIR'] = self.user_data_dir
-    if not os.path.exists(os.environ['MPLCONFIGDIR']):
-        os.makedirs(os.environ['MPLCONFIGDIR'])
-    from android.permissions import request_permissions, Permission
-    request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
+
 
 class CustomScatter(Scatter):
     def on_touch_down(self, touch):
@@ -278,6 +271,14 @@ class MetroMapApp(MDApp):
 
         return self.root
 
+
+    def on_start(self):
+        if platform == 'android':
+            os.environ['MPLCONFIGDIR'] = os.path.join(self.user_data_dir, 'cache')
+            if not os.path.exists(os.environ['MPLCONFIGDIR']):
+                os.makedirs(os.environ['MPLCONFIGDIR'])
+            from android.permissions import request_permissions, Permission
+            request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_MEDIA_IMAGES, Permission.READ_MEDIA_VIDEO, Permission.READ_MEDIA_AUDIO])
     def style_buttons(self, buttons):
         for button in buttons:
             button.background_normal = ''
